@@ -2,7 +2,7 @@ import { Process } from './Process';
 import { HardDrive } from './HardDrive';
 import { Processor } from './Processor';
 import { Controller } from './Controller';
-import { FIFO, FLOOK, SSTF } from './Algorithms';
+import { FIFO, F_LOOK, SSTF } from './Algorithms';
 import { Query } from './Query';
 import { Algorithm, TypeFile } from '../shared';
 import { getRandom, getRandomInt } from './utils';
@@ -61,7 +61,7 @@ export function getCalculations(algo: Algorithm, maxQty: number) {
       hardDriveController = new Controller(hardDrive, new SSTF(QUEUE_SIZE));
       break;
     case Algorithm.F_LOOK:
-      hardDriveController = new Controller(hardDrive, new FLOOK(QUEUE_SIZE));
+      hardDriveController = new Controller(hardDrive, new F_LOOK(QUEUE_SIZE));
       break;
     default:
       return null;
@@ -136,9 +136,9 @@ export function getCalculations(algo: Algorithm, maxQty: number) {
     globalTime++;
   }
 
-  console.log(`Total completed queries: ${completedQueriesCounter}`);
-  console.log(`Average: ${completedQueriesCounter / (processor.time / 1000)}`);
-  console.log(`Execution time: ${globalTime}`);
+  console.log(`Число виконаних запитів: ${completedQueriesCounter}`);
+  console.log(`Середній час виконання запиту: ${completedQueriesCounter / (processor.time / 1000)}`);
+  console.log(`Час виконання обчислень: ${globalTime}`);
 
   // chart data formation
   const data1 = {

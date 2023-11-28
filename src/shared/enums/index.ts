@@ -4,8 +4,8 @@ export enum TypeQuery {
 }
 
 export enum StateQueueActive {
-  FIRST_QUEUE,
-  SECOND_QUEUE,
+  FIRST_QUEUE_ACTIVE,
+  SECOND_QUEUE_ACTIVE,
 }
 
 export enum HardDriveState {
@@ -31,3 +31,9 @@ export enum Algorithm {
   SSTF = 'SSTF',
   F_LOOK = 'F-LOOK',
 }
+
+export enum LOOKState {
+  ASCENDING,
+  DESCENDING,
+}
+
