@@ -1,17 +1,18 @@
 import seedrandom from 'seedrandom';
 import { queryCompletionTimes } from '../Main';
 
+// генерація рандомних чисел
 export const seed = '2';
-const rng = seedrandom(seed);
+const range = seedrandom(seed);
 
 // метод для генерації випадковго цілого числа в певному проміжку
 export function getRandomInt(max: number): number {
-  return Math.floor(rng() * max);
+  return Math.floor(range() * max);
 }
 
-// отримання випадкового числа дробового
+// отримання випадкового дробового числа
 export function getRandom() {
-  return rng();
+  return range();
 }
 
 export function getExponentiallyRandom(

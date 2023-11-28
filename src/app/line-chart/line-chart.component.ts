@@ -39,10 +39,6 @@ export class LineChartComponent implements OnInit, OnDestroy {
           'Час виконання запиту, мс'
         );
 
-        if (this.chart2 || this.chart) {
-          this.chart.destroy();
-          this.chart2.destroy();
-        }
 
         this.chart = new Chart('MyChart1', config1);
         this.chart2 = new Chart('MyChart2', config2);
