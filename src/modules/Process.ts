@@ -1,4 +1,4 @@
-import { MyController } from './MyController';
+import { Controller } from './Controller';
 import { Query, TypeQuery } from './Query';
 import { QueryStyle, TypeFile, File, State } from '../shared';
 import { getRandom, getRandomInt } from './utils';
@@ -24,7 +24,7 @@ export class Process {
 
   public file: File;
   private readOnly: boolean;
-  private hardDriveController: MyController;
+  private hardDriveController: Controller;
   private lastQueriedBlockNumber: number;
   private queryStyle: QueryStyle;
   private state: State;
@@ -37,7 +37,7 @@ export class Process {
   constructor(
     file: File,
     readOnly: boolean,
-    hardDriveController: MyController
+    hardDriveController: Controller
   ) {
     // перевірка на існування файлу
     if (!file || !file.blocks || file.blocks.length === 0) {

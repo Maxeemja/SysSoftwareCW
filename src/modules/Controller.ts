@@ -1,4 +1,4 @@
-import { QuerySelAlgorithm } from '../shared';
+import { RequestSelectionAlgorithm } from '../shared';
 import { HardDrive, Idle } from './HardDrive';
 import { SECTORS_PER_TRACK, incrementCompletedQueriesCounter } from './Main';
 import { Query, TypeQuery } from './Query';
@@ -7,30 +7,30 @@ import { addQueryCompletionTime } from './utils';
 export class QueueExeption extends Error {}
 let queryCompletionTime = 0;
 
-export class MyController {
+export class Controller {
   //поле що відповідає за поточний запит що виконується
   private queryUnderExecution?: Query;
   // поле відповідає за алгоритм вибору запитів для виконання
-  private querySelectionAlgorithm: QuerySelAlgorithm;
+  private reqSelectionAlgorithm: RequestSelectionAlgorithm;
   private hardDrive: HardDrive;
 
   constructor(
     hardDrive: HardDrive,
-    querySelectionAlgorithm: QuerySelAlgorithm
+    reqSelectionAlgorithm: RequestSelectionAlgorithm
   ) {
     this.hardDrive = hardDrive;
-    this.querySelectionAlgorithm = querySelectionAlgorithm;
+    this.reqSelectionAlgorithm = reqSelectionAlgorithm;
   }
 
   // Метод для додання запиту до черги обробки
   addQueryToQueue(query: Query): void {
-    this.querySelectionAlgorithm.tryAddQueryToQueue(query);
+    this.reqSelectionAlgorithm.tryAddQueryToQueue(query);
   }
 
   // Данийметод виконує запити з черги
   private executeQueryFromQueue(): void {
     // вибір запиту
-    const queryToBeExecuted = this.querySelectionAlgorithm.selectQuery(
+    const queryToBeExecuted = this.reqSelectionAlgorithm.selectQuery(
       this.hardDrive.state.position
     );
 

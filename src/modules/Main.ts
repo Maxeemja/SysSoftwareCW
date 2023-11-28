@@ -1,8 +1,8 @@
 import { Process } from './Process';
 import { HardDrive } from './HardDrive';
 import { Processor } from './Processor';
-import { MyController } from './MyController';
-import { CircularFLOOK, FIFO, SSTF } from './Algorithm';
+import { Controller } from './Controller';
+import { FIFO, FLOOK, SSTF } from './Algorithms';
 import { Query } from './Query';
 import { Algorithm, TypeFile } from '../shared';
 import { getRandom, getRandomInt } from './utils';
@@ -47,22 +47,21 @@ export function incrementCompletedQueriesCounter(queryUnderExecution: Query) {
   completedQueriesCounter++;
 }
 
+
+// головна функція яка повертає дані для побудови графіків, використовується на стороні фронтенду, у course-work.service.ts
 export function getCalculations(algo: Algorithm, maxQty: number) {
   const hardDrive = new HardDrive(hardDriveTracks);
   let hardDriveController = null;
 
   switch (algo) {
     case Algorithm.FIFO:
-      hardDriveController = new MyController(hardDrive, new FIFO(QUEUE_SIZE));
+      hardDriveController = new Controller(hardDrive, new FIFO(QUEUE_SIZE));
       break;
     case Algorithm.SSTF:
-      hardDriveController = new MyController(hardDrive, new SSTF(QUEUE_SIZE));
+      hardDriveController = new Controller(hardDrive, new SSTF(QUEUE_SIZE));
       break;
     case Algorithm.F_LOOK:
-      hardDriveController = new MyController(
-        hardDrive,
-        new CircularFLOOK(QUEUE_SIZE)
-      );
+      hardDriveController = new Controller(hardDrive, new FLOOK(QUEUE_SIZE));
       break;
     default:
       return null;
@@ -158,10 +157,7 @@ export function getCalculations(algo: Algorithm, maxQty: number) {
     yData: [],
   };
 
-  queryCompletionTimes.splice(0, 200).map((el) => {
-    data2.yData.push(el);
-  });
-
+  data2.yData = queryCompletionTimes.splice(0, 200);
   data2.xData = Array(200)
     .fill(0)
     .map((_, i) => i + 1);

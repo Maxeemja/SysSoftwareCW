@@ -32,6 +32,7 @@ export class LineChartComponent implements OnInit, OnDestroy {
           'Час, мс',
           'Номер доріжки'
         );
+
         const config2 = this.service.generateChartConfig(
           data2,
           'Номер запиту',
