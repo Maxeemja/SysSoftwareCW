@@ -1,0 +1,50 @@
+<main>
+  <div class="header">
+    <h2>Курсова робота СПЗ</h2>
+    <h5>Виконав: студент групи ІО-02</h5>
+    <h5><u>Грицюк Максим Юрійович</u></h5>
+    <h5>Варіант: 3 (210 % 4 + 1 = 3)</h5>
+    <h5>LRU з двома сегментами, FCFS, SSTF, F-LOOK.</h5>
+  </div>
+
+  <div class="btns-container">
+    <mat-form-field>
+      <mat-label>Алгоритм</mat-label>
+      <mat-select [(value)]="algorithm">
+        @for (algo of ["FCFS", "SSTF", "F-LOOK"]; track algo) {
+        <mat-option [value]="algo">{{ algo }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>К-ть операцій/сек</mat-label>
+      <mat-select [(value)]="opsQtyPerSec">
+        @for (number of [10, 20, 30, 40, 50]; track number) {
+        <mat-option [value]="number">{{ number }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <mat-divider></mat-divider>
+    <button
+      (click)="onSubmit()"
+      class="submit-btn"
+      mat-raised-button
+      color="primary"
+    >
+      Отримати графік
+    </button>
+  </div>
+  <ng-container *ngIf="!(isLoading$ | async); else loading">
+    test
+    <ng-container *ngIf="chartData$ | async as chartData">
+      <section class="chart" *ngIf="chartData.length">
+        <app-line-chart></app-line-chart>
+      </section>
+    </ng-container>
+  </ng-container>
+</main>
+<router-outlet></router-outlet>
+
+<ng-template #loading>
+  <div>LOADING....</div>
+</ng-template>
