@@ -11,7 +11,7 @@
     <mat-form-field>
       <mat-label>Алгоритм</mat-label>
       <mat-select [(value)]="algorithm">
-        @for (algo of ["FCFS", "SSTF", "F-LOOK"]; track algo) {
+        @for (algo of ["FIFO", "SSTF", "F-LOOK"]; track algo) {
         <mat-option [value]="algo">{{ algo }}</mat-option>
         }
       </mat-select>
@@ -27,6 +27,7 @@
     <mat-divider></mat-divider>
     <button
       (click)="onSubmit()"
+      [disabled]="isLoading$ | async"
       class="submit-btn"
       mat-raised-button
       color="primary"
@@ -34,8 +35,7 @@
       Отримати графік
     </button>
   </div>
-  <ng-container *ngIf="!(isLoading$ | async); else loading">
-    test
+  <ng-container *ngIf="!(isLoading$ | async); else spinner">
     <ng-container *ngIf="chartData$ | async as chartData">
       <section class="chart" *ngIf="chartData.length">
         <app-line-chart></app-line-chart>
@@ -45,6 +45,12 @@
 </main>
 <router-outlet></router-outlet>
 
-<ng-template #loading>
-  <div>LOADING....</div>
+<ng-template #spinner>
+  <mat-progress-spinner
+    class="example-margin"
+    [color]="'#000'"
+    mode="indeterminate"
+    [value]="50"
+  >
+  </mat-progress-spinner>
 </ng-template>

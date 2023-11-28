@@ -1,8 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import Chart from 'chart.js/auto';
+import Chart, { ChartTypeRegistry } from 'chart.js/auto';
 import { CourseWorkService } from '../services/course-work.service';
-import { take } from 'rxjs';
+import { Subject, take, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-line-chart',
@@ -11,45 +11,45 @@ import { take } from 'rxjs';
   templateUrl: './line-chart.component.html',
   styleUrl: './line-chart.component.scss',
 })
-export class LineChartComponent {
-  public chart: any;
+export class LineChartComponent implements OnInit, OnDestroy {
+  public chart: Chart;
+  public chart2: Chart;
+
+  private destroy$ = new Subject<boolean>();
 
   constructor(private service: CourseWorkService) {}
 
   ngOnInit(): void {
-    this.createChart();
+    this.createCharts();
   }
 
-  createChart() {
-    let data;
-    this.service.chartData$.pipe(take(1)).subscribe((value) => {
-      data = value;
-    });
-    // const data = this.service.getData();
-    this.chart = new Chart('MyChart', {
-      type: 'line',
-      data: {
-        labels: Array(200)
-          .fill(0)
-          .map((_, i) => i + 1),
-        datasets: [
-          {
-            label: '# of Operations',
-            data,
-            borderWidth: 1,
-          },
-        ],
-      },
-      options: {
-        layout: {
-          padding: 10,
-        },
-        scales: {
-          y: {
-            beginAtZero: true,
-          },
-        },
-      },
-    });
+  createCharts() {
+    this.service.chartData$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(([data1, data2]) => {
+        const config1 = this.service.generateChartConfig(
+          data1,
+          'Час, мс',
+          'Номер доріжки'
+        );
+        const config2 = this.service.generateChartConfig(
+          data2,
+          'Номер запиту',
+          'Час виконання запиту, мс'
+        );
+
+        if (this.chart2 || this.chart) {
+          this.chart.destroy();
+          this.chart2.destroy();
+        }
+
+        this.chart = new Chart('MyChart1', config1);
+        this.chart2 = new Chart('MyChart2', config2);
+      });
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next(true);
+    this.destroy$.complete();
   }
 }

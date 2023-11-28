@@ -1,11 +1,11 @@
 import { Process } from './Process';
 import { HardDrive } from './HardDrive';
 import { Processor } from './Processor';
-import MyController from './MyController';
+import { MyController } from './MyController';
 import { CircularFLOOK, FIFO, SSTF } from './Algorithm';
-import seedrandom from 'seedrandom';
 import { Query } from './Query';
 import { Algorithm, TypeFile } from '../shared';
+import { getRandom, getRandomInt } from './utils';
 
 // Константа яка відповідаж  кількості процесів у системі
 const PROCESS_COUNT: number = 10;
@@ -13,13 +13,12 @@ const PROCESS_COUNT: number = 10;
 const NEIGHBORING_BLOCK_WRITE_PROBABILITY: number = 0.3;
 // кількість доріжок жорсткого диску
 const TRACK_COUNT: number = 500;
-// максимальна кількість запитів в секунду
-const MAX_QUERIES_PER_SECOND: number = 20;
 // лічильник виконаних запитів
 export let completedQueriesCounter = 0;
+
 export const queryCompletionTimes: Array<number> = [];
 
-// кількість секторів на доріжчі
+// кількість секторів на доріжці
 export const SECTORS_PER_TRACK = 100;
 // максимальна кількість запитів до контроллера жорсткого диску
 export const QUEUE_SIZE = 20;
@@ -37,15 +36,10 @@ const processes: Process[] = [];
 let currentFileBlock = 0;
 let globalTime = 0;
 
-// метод для додання часу зачершення запиту використовується в контроллері
-export function addQueryCompletionTime(time: number): void {
-  queryCompletionTimes.push(time);
-}
-
-const arrayProsition: string[] = [];
+export const arrayOfPositions: string[] = [];
 // метод для збільшення лічильника виконаних запитів
 export function incrementCompletedQueriesCounter(queryUnderExecution: Query) {
-  arrayProsition.push(
+  arrayOfPositions.push(
     `${globalTime} ${Math.floor(
       queryUnderExecution.sectorNumber / SECTORS_PER_TRACK
     )}`
@@ -53,50 +47,12 @@ export function incrementCompletedQueriesCounter(queryUnderExecution: Query) {
   completedQueriesCounter++;
 }
 
-// у даній роботі для отримування одинакових випадкових значень
-// при запуску програми варто використовувати зерно з бібліотеки seedrandom
-export const seed = '2';
-const rng = seedrandom(seed);
-
-// метод для генерації випадковго цілого числа в певному проміжку
-export function getRandomeInt(max: number): number {
-  return Math.floor(rng() * max);
-}
-
-// отримання випадкового числа дробового
-export function getRandom() {
-  return rng();
-}
-
-// у даній роботі потрібно реалізувати експотенціальний розподіл запитів
-// у моємо випадку роблю додатково 2 перевірки на переповнення стеку та
-// отримане значення має бути > 1 для можливості отримати запит
-export function getExponentiallyRandom(
-  max: number,
-  lambda: number = 2,
-  minDepth: number = 0,
-  maxDepth: number = 100
-): number {
-  const result = Math.floor(max - (Math.log(1 - getRandom()) / -lambda) * max);
-  if (minDepth > maxDepth) {
-    //обрблювати подію переповнення стеку
-    return result;
-  }
-
-  return result < 1
-    ? getExponentiallyRandom(max, lambda, minDepth + 1, maxDepth)
-    : result;
-}
-// Ексорт змінної жорсткого диску для отримання всіх треків на вебі (index.ts)
-export const hardDrive = new HardDrive(hardDriveTracks);
-// Заготовки створення контроллера жорсткого диску відповідно до різних алгоритмів планування введення-виведення
-// const hardDriveController = new MyController(hardDrive, new FIFO(QUEUE_SIZE))
-// const hardDriveController = new MyController(hardDrive, new SSTF(QUEUE_SIZE))
-
-export function main(algo: Algorithm, maxQty: number) {
+export function getCalculations(algo: Algorithm, maxQty: number) {
+  const hardDrive = new HardDrive(hardDriveTracks);
   let hardDriveController = null;
+
   switch (algo) {
-    case Algorithm.FSFC:
+    case Algorithm.FIFO:
       hardDriveController = new MyController(hardDrive, new FIFO(QUEUE_SIZE));
       break;
     case Algorithm.SSTF:
@@ -114,7 +70,7 @@ export function main(algo: Algorithm, maxQty: number) {
 
   for (let i = 0; i < PROCESS_COUNT; i++) {
     // отримання випадкового цілого числа
-    const fileType = getRandomeInt(3);
+    const fileType = getRandomInt(3);
 
     // зміна для вмісту розміру файлу
     let fileSize: number = 0;
@@ -123,15 +79,15 @@ export function main(algo: Algorithm, maxQty: number) {
     switch (fileType) {
       // невеликі файли до 10 блоків
       case TypeFile.SMALL:
-        fileSize = getRandomeInt(10) + 1;
+        fileSize = getRandomInt(10) + 1;
         break;
       // середні файли з розміром від 11 до 150 блоків
       case TypeFile.MEDIUM:
-        fileSize = getRandomeInt(150 - 11 + 1) + 11;
+        fileSize = getRandomInt(150 - 11 + 1) + 11;
         break;
       // великі файли з розміром від 151 до 500 блоків
       case TypeFile.LARGE:
-        fileSize = getRandomeInt(500 - 151 + 1) + 151;
+        fileSize = getRandomInt(500 - 151 + 1) + 151;
         break;
     }
 
@@ -140,7 +96,6 @@ export function main(algo: Algorithm, maxQty: number) {
 
     // виконується створення блоків файлу
     for (let j = 0; j < fileSize; j++) {
-      //Math.random()
       // виконується перевірка запису файлу в сусідній блок чи випадковий
       const recordInTheNeighboringBlock: boolean =
         getRandom() < NEIGHBORING_BLOCK_WRITE_PROBABILITY;
@@ -161,7 +116,7 @@ export function main(algo: Algorithm, maxQty: number) {
       fileBlocks.push(fileBlock);
     }
     // випадковий вибір із рівною можливістю чи файл використовується ише для читання
-    const fileIsReadOnly: boolean = getRandomeInt(1) === 0;
+    const fileIsReadOnly: boolean = getRandomInt(1) === 0;
     // створення процесу
     processes.push(
       new Process(
@@ -181,19 +136,35 @@ export function main(algo: Algorithm, maxQty: number) {
     hardDrive.step();
     globalTime++;
   }
-  const firstTwoHundredQueryCompletionTimes = queryCompletionTimes.splice(
-    0,
-    200
-  );
-  return firstTwoHundredQueryCompletionTimes;
+
+  console.log(`Total completed queries: ${completedQueriesCounter}`);
+  console.log(`Average: ${completedQueriesCounter / (processor.time / 1000)}`);
+  console.log(`Execution time: ${globalTime}`);
+
+  // chart data formation
+  const data1 = {
+    xData: [],
+    yData: [],
+  };
+
+  arrayOfPositions.slice(0, 200).map((el) => {
+    const tempArr = el.split(' ');
+    data1.xData.push(tempArr[0]);
+    data1.yData.push(tempArr[1]);
+  });
+
+  const data2 = {
+    xData: [],
+    yData: [],
+  };
+
+  queryCompletionTimes.splice(0, 200).map((el) => {
+    data2.yData.push(el);
+  });
+
+  data2.xData = Array(200)
+    .fill(0)
+    .map((_, i) => i + 1);
+
+  return [data1, data2];
 }
-
-// Створення процесів
-
-// const path = __dirname.replace('modules', 'outputLogs/') + 'FLOOKHardDrivePosition.txt';
-
-// fs.writeFile(path, `${firstTwoHundredQueryCompletionTimes.join('\n')}`, () => {});
-
-// console.log(`Total completed queries: ${completedQueriesCounter}`);
-// console.log(`Average: ${completedQueriesCounter / (processor.time / 1000)}`);
-// console.log(`Execution time: ${globalTime}`);

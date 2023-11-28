@@ -1,8 +1,21 @@
-import MyController from './MyController';
+import { MyController } from './MyController';
 import { Query, TypeQuery } from './Query';
-import { getRandom, getRandomeInt, seed } from './Main';
-import { QueryStyle, TypeFile, File } from '../shared';
+import { QueryStyle, TypeFile, File, State } from '../shared';
+import { getRandom, getRandomInt } from './utils';
 
+// Позначає стан коли процес готується генерувати новиі запит
+class CreatingQueryState extends State {}
+// Позначає стан коли процес знаходиться в процесі обробки запиту
+class ProcessingQueryState extends State {}
+// Позначає стан коли процес створив запити і готовий його обробляти
+class CreatedQueryState extends State {
+  query: Query;
+
+  constructor(query: Query) {
+    super(1);
+    this.query = query;
+  }
+}
 
 export class Process {
   // Час для створення та обробки результату запиту
@@ -21,7 +34,11 @@ export class Process {
   // Лічильник створених запитів
   public createdQueriesCounter: number = 0;
 
-  constructor(file: File, readOnly: boolean, hardDriveController: MyController) {
+  constructor(
+    file: File,
+    readOnly: boolean,
+    hardDriveController: MyController
+  ) {
     // перевірка на існування файлу
     if (!file || !file.blocks || file.blocks.length === 0) {
       throw new Error('Invalid file provided');
@@ -30,14 +47,13 @@ export class Process {
     this.readOnly = readOnly;
     this.hardDriveController = hardDriveController;
     this.lastQueriedBlockNumber = file.blocks[0];
-    // Math.random() > 0.5
     // встановлення стилю запиту відповідно до умови роботи:
     // Вірогідність запису блоку файлу дорівнює 50%. Процес звертається
     // до випадкових блоків файлу (невеликі, середні та великі файли) або послідовно до блоків
     // файлу, а в разі завершення файлу знову послідовно з початку (великі файли).
     this.queryStyle =
       file.type === TypeFile.LARGE
-        ? getRandomeInt(1) === 0
+        ? getRandomInt(1) === 0
           ? QueryStyle.RANDOM
           : QueryStyle.SEQUENTIAL
         : QueryStyle.RANDOM;
@@ -52,16 +68,24 @@ export class Process {
       if (progress === Process.CREATION_QUERY_TIME) {
         // випадкова ненерація типу запиту
         //Math.random() < 0.5
-        const queryType = this.readOnly ? TypeQuery.READ : getRandomeInt(1) === 0 ? TypeQuery.READ : TypeQuery.WRITE;
+        const queryType = this.readOnly
+          ? TypeQuery.READ
+          : getRandomInt(1) === 0
+          ? TypeQuery.READ
+          : TypeQuery.WRITE;
         let sectorToQuery: number;
         // в залежності від стилю генерації запиту
         // визначаємо до якого номеру сектору буде здійснено запит
         if (this.queryStyle === QueryStyle.RANDOM) {
           //потрібно використовувати зерно
           //Math.random()
-          sectorToQuery = this.file.blocks[Math.floor(getRandom() * this.file.blocks.length)];
+          sectorToQuery =
+            this.file.blocks[Math.floor(getRandom() * this.file.blocks.length)];
         } else {
-          sectorToQuery = this.file.blocks[(this.lastQueriedBlockNumber + 1) % this.file.blocks.length];
+          sectorToQuery =
+            this.file.blocks[
+              (this.lastQueriedBlockNumber + 1) % this.file.blocks.length
+            ];
         }
         // виконуємо перевизначення останього блоку
         this.lastQueriedBlockNumber = sectorToQuery;
@@ -74,7 +98,6 @@ export class Process {
         this.state = new CreatingQueryState(progress + 1);
       }
     } else if (this.state instanceof CreatedQueryState) {
-      // !!!!Переглянути
       // можливий випадок коли процес не може створювати нові зпити
       if (!this.canCreateQueries) {
         // У такому випадку пропускаємо такт
@@ -103,28 +126,5 @@ export class Process {
   }
   provideTheQueryResult() {
     this.state = new ProcessingQueryState(1);
-  }
-}
-
-// клас state виступає абстрактним класом та визначає загальну
-// властивість для всіх дочірніх станів (прогрес)
-abstract class State {
-  public progress: number;
-
-  constructor(progress: number) {
-    this.progress = progress;
-  }
-}
-// Позначає стан коли процес готується генерувати новиі запит
-class CreatingQueryState extends State {}
-// Позначає стан коли процес знаходиться в процесі обробки запиту
-class ProcessingQueryState extends State {}
-// Позначає стан коли процес створив запити і готовий його обробляти
-class CreatedQueryState extends State {
-  query: Query;
-
-  constructor(query: Query) {
-    super(1);
-    this.query = query;
   }
 }

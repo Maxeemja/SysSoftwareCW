@@ -1,23 +1,23 @@
 import { QuerySelAlgorithm } from '../shared';
-import { HardDrive, Idle} from './HardDrive';
-import {
-  SECTORS_PER_TRACK,
-  addQueryCompletionTime,
-  incrementCompletedQueriesCounter,
-} from './Main';
+import { HardDrive, Idle } from './HardDrive';
+import { SECTORS_PER_TRACK, incrementCompletedQueriesCounter } from './Main';
 import { Query, TypeQuery } from './Query';
+import { addQueryCompletionTime } from './utils';
 
 export class QueueExeption extends Error {}
 let queryCompletionTime = 0;
 
-export default class MyController {
+export class MyController {
   //поле що відповідає за поточний запит що виконується
   private queryUnderExecution?: Query;
   // поле відповідає за алгоритм вибору запитів для виконання
   private querySelectionAlgorithm: QuerySelAlgorithm;
   private hardDrive: HardDrive;
 
-  constructor(hardDrive: HardDrive, querySelectionAlgorithm: QuerySelAlgorithm) {
+  constructor(
+    hardDrive: HardDrive,
+    querySelectionAlgorithm: QuerySelAlgorithm
+  ) {
     this.hardDrive = hardDrive;
     this.querySelectionAlgorithm = querySelectionAlgorithm;
   }
@@ -30,12 +30,16 @@ export default class MyController {
   // Данийметод виконує запити з черги
   private executeQueryFromQueue(): void {
     // вибір запиту
-    const queryToBeExecuted = this.querySelectionAlgorithm.selectQuery(this.hardDrive.state.position);
+    const queryToBeExecuted = this.querySelectionAlgorithm.selectQuery(
+      this.hardDrive.state.position
+    );
 
     if (queryToBeExecuted) {
       // якщо запит існує виконуємо переміщення жорсткого диска
       // до відповідної позиції для виконання запиту
-      this.hardDrive.moveDriveTo(Math.floor(queryToBeExecuted.sectorNumber / SECTORS_PER_TRACK));
+      this.hardDrive.moveDriveTo(
+        Math.floor(queryToBeExecuted.sectorNumber / SECTORS_PER_TRACK)
+      );
       // console.log(`TargetPosition: ${Math.floor(queryToBeExecuted.sectorNumber / SECTORS_PER_TRACK)}`)
       // виконуємо скидання часу виконання запиту
       queryCompletionTime = 0;
@@ -61,7 +65,10 @@ export default class MyController {
         // Інкрементуємо зач виконання запиту
         queryCompletionTime++;
         // перевірка жорсткого диску на чтан очікування та поля готовності
-        if (this.hardDrive.state instanceof Idle && (<Idle>this.hardDrive.state).isReady) {
+        if (
+          this.hardDrive.state instanceof Idle &&
+          (<Idle>this.hardDrive.state).isReady
+        ) {
           // виконуємо операції на поточному секторі жорсткого диску
           this.hardDrive.performAnOperationOnCurrentSector();
           // console.log(completedQueriesCounter, this.queryUnderExecution.sectorNumber)
@@ -70,7 +77,10 @@ export default class MyController {
           // додавання часу виконання запиту до загального часу
           addQueryCompletionTime(queryCompletionTime);
           // перевірка чи запит був типу читання і повязаний із процесором
-          if (this.queryUnderExecution.type === TypeQuery.READ && this.queryUnderExecution.process) {
+          if (
+            this.queryUnderExecution.type === TypeQuery.READ &&
+            this.queryUnderExecution.process
+          ) {
             // якщо умова вертає істину передаємо результат процесу
             this.queryUnderExecution.process.provideTheQueryResult();
           }

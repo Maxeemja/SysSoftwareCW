@@ -9,8 +9,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatButtonModule } from '@angular/material/button';
 import { Algorithm } from '../shared';
-import { Chart } from 'chart.js';
 import { LineChartComponent } from './line-chart/line-chart.component';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'app-root',
@@ -25,6 +25,7 @@ import { LineChartComponent } from './line-chart/line-chart.component';
     MatDividerModule,
     MatButtonModule,
     LineChartComponent,
+    MatProgressSpinnerModule,
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',

@@ -1,7 +1,7 @@
-import { getExponentiallyRandom } from './Main';
 import { Process } from './Process';
+import { getExponentiallyRandom } from './utils';
+
 export class Processor {
-  // private hardDriveController: Controller;
   // Публічна змінна яка відповідає за масив процесів
   public processes: Process[];
   // кількість тактів кожному процесору для виконання
@@ -26,7 +26,9 @@ export class Processor {
   step(): void {
     if (this.time % 1000 === 0) {
       // обраховується експотенціально
-      this.maxQueriesPerThisSecond = getExponentiallyRandom(this.maxQueriesPerSecond);
+      this.maxQueriesPerThisSecond = getExponentiallyRandom(
+        this.maxQueriesPerSecond
+      );
 
       let uniformDistributionUsedQueries = 0;
       this.maxQueriesPerProcess = new Array(this.processes.length).fill(0);
@@ -49,7 +51,8 @@ export class Processor {
 
     // Перевірка чи є можливість у даного процечору створювати нові запити
     this.processes[this.currActiveProcess].canCreateQueries =
-      this.processes[this.currActiveProcess].createdQueriesCounter < this.maxQueriesPerProcess[this.currActiveProcess];
+      this.processes[this.currActiveProcess].createdQueriesCounter <
+      this.maxQueriesPerProcess[this.currActiveProcess];
 
     // для поточного процесу виконуємо виклик методу наступного кроку (step)
     this.processes[this.currActiveProcess].step();
@@ -57,7 +60,8 @@ export class Processor {
     this.time++;
     // Перевірка кванту часу, якщо він пройшов то переходимо до наступного активного процесу
     if (this.time % this.quantumeOfTime === 0) {
-      this.currActiveProcess = (this.currActiveProcess + 1) % this.processes.length;
+      this.currActiveProcess =
+        (this.currActiveProcess + 1) % this.processes.length;
     }
   }
 }

@@ -27,7 +27,7 @@ export enum QueryStyle {
 }
 
 export enum Algorithm {
-  FSFC = 'FSFC',
+  FIFO = 'FIFO',
   SSTF = 'SSTF',
   F_LOOK = 'F-LOOK',
 }
