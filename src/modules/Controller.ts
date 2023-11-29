@@ -40,7 +40,6 @@ export class Controller {
       this.hardDrive.moveDriveTo(
         Math.floor(queryToBeExecuted.sectorNumber / SECTORS_PER_TRACK)
       );
-      // console.log(`TargetPosition: ${Math.floor(queryToBeExecuted.sectorNumber / SECTORS_PER_TRACK)}`)
       // виконуємо скидання часу виконання запиту
       queryCompletionTime = 0;
       // запам'ятовування запиту який виконується
@@ -52,8 +51,6 @@ export class Controller {
   }
 
   step(): void {
-    // метод для обробки кроку запитів
-    // console.log(this.queryUnderExecution)
     switch (this.queryUnderExecution) {
       // якщо немає запитів, що виконуються, виконуємо вибір запитів із черги
       case undefined:
@@ -71,7 +68,6 @@ export class Controller {
         ) {
           // виконуємо операції на поточному секторі жорсткого диску
           this.hardDrive.performAnOperationOnCurrentSector();
-          // console.log(completedQueriesCounter, this.queryUnderExecution.sectorNumber)
           // збільшуємо лічильник виконаних запитів
           incrementCompletedQueriesCounter(this.queryUnderExecution);
           // додавання часу виконання запиту до загального часу

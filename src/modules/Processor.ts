@@ -44,7 +44,6 @@ export class Processor {
 
       this.processes.forEach((process) => {
         // виконуємо обнулення лічильника виконаних запитів кожного процесу
-        // console.log(`Time ${this.time}: ${process.createdQueriesCounter}`)
         process.createdQueriesCounter = 0;
       });
     }

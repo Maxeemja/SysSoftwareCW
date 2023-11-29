@@ -4,10 +4,6 @@ export class HardDrive {
   static TIME_PER_TRACK = 10;
   // Час затримки обертання
   static ROTATION_DELAY_TIME = 8;
-  // Час перемі-
-  // щення механізму приводу від першої доріжки до зовнішній
-  // доріжки (найближчої до зовнішнього
-  // краю пластини) або від зовнішньої доріжки до першої доріжки
   static MOVEMENT_TIME_BETWEEN_TRACKS = 130;
 
   // Доріжки жорсткого диску
@@ -16,8 +12,6 @@ export class HardDrive {
   private timePerTrack: number;
   // Час затримки обертання
   private rotationDelayTime: number;
-  // Час переміщення переміщення привожу від першої до зовнішньої
-  private movementTimeBetweenTracks: number;
   // Стан жорсткого диску який може бути у формі Idle Moving  Waiting Rotation
   state: StateHardDrive;
   // номер треку
@@ -28,12 +22,11 @@ export class HardDrive {
     tracks: boolean[][],
     timePerTrack: number = HardDrive.TIME_PER_TRACK,
     rotationDelayTime: number = HardDrive.ROTATION_DELAY_TIME,
-    movementTimeBetweenTracks: number = HardDrive.MOVEMENT_TIME_BETWEEN_TRACKS,
+    _movementTimeBetweenTracks: number = HardDrive.MOVEMENT_TIME_BETWEEN_TRACKS,
   ) {
     this.tracks = tracks;
     this.timePerTrack = timePerTrack;
     this.rotationDelayTime = rotationDelayTime;
-    this.movementTimeBetweenTracks = movementTimeBetweenTracks;
     this.state = StateHardDrive.Idle(0, false);
   }
   // Виконуємо операцію на поточному секторі
